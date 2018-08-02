@@ -215,9 +215,12 @@ def get_args():
             help="number of threads [default %(default)s]", type=int, metavar="STR")
     parser.add_argument("--prefix",
         help="output file name [default %(default)s]", metavar="STR")
+    parser.add_argument("--outdir",
+        help="output directory [default %(default)s]", metavar="DIR")
     parser.add_argument("--tmp",
         help="temporary directory [default %(default)s]",
         default="tmp", metavar="DIR")
+
     if len(sys.argv) <= 1:
         parser.print_help()
         exit()
@@ -227,6 +230,10 @@ def get_args():
 def main():
     
     args = get_args()
+    
+    # make dirs
+    if not os.path.exists(args.outdir):
+        os.mkdir(args.outdir)
 
     if not os.path.exists(args.tmp):
         os.mkdir(args.tmp)
@@ -304,7 +311,7 @@ def main():
 
     # decipher_hi
     decipher_hi_range_intersect = RangeCompare(bedtools, bed_query,
-            decipher_hi_db, args.min_overlap, args.tmp, args.prefix,
+            decipher_hi_db, 0, args.tmp, args.prefix,
             "decipher_hi")
     format_pub_result(decipher_hi_range_intersect, decipher_hi_field_names)
 
@@ -389,8 +396,8 @@ def main():
     # OMG, got the END...
     annot_result = public_results
     update_result(annot_result, local_intersect_merged)
-    for k in annot_result:
-        print(k, annot_result[k])
+    # for k in annot_result:
+    #    print(k, annot_result[k])
 
     # make table
     # fields
@@ -402,7 +409,8 @@ def main():
 
     header_str, table = table_maker(query_list, annot_result, result_field_names)
 
-    with open(args.prefix + ".svan.tsv", "w") as io:
+    prefix_with_dir = os.path.join(args.outdir, args.prefix)
+    with open(prefix_with_dir + ".svan.tsv", "w") as io:
         io.write(header_str)
         io.writelines(table)
 

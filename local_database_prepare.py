@@ -105,6 +105,29 @@ def vcf_to_db_bed(_args):
             out_hd.writelines(bed_lines)
 
 
+def db_check(vcf_list, db_bed_list):
+    """
+    return vcf list if it have not been added to the database
+    """
+    db_sample_ids = dict()
+    for i in db_bed_list:
+        basename = os.path.basename(i)
+        sample_id = basename.split(".")[0]
+        if sample_id not in db_sample_ids:
+            db_sample_ids[sample_id] = 1
+        else:
+            raise RuntimeError("Duplicated sample {} in your database".format(sample_id))
+    
+    vcf_tobe_add = []
+    for i in vcf_list:
+        basename = os.path.basename(i)
+        sample_id = basename.split(".")[0]
+        if sample_id not in db_sample_ids:
+            vcf_tobe_add.append(i)
+
+    return vcf_tobe_add
+
+
 def get_args():
     parser = argparse.ArgumentParser(
         description="Prepare Local SV Database",
@@ -131,11 +154,21 @@ def main():
     # vcf file list
     vcfs = iglob(os.path.join(args.vcf_dir, "*.vcf"))
 
+    db_beds = []
     if not os.path.exists(args.db_dir):
         os.mkdir(args.db_dir)
+    else:
+        db_beds = iglob(os.path.join(args.db_dir, "*.bed"))
+
+    vcf_tobe_add = db_check(vcfs, db_beds)
+    #for i in vcf_tobe_add:
+    #    print("add {} to local SV database".format(i))
+    if len(vcf_tobe_add) == 0:
+        print("database is newest.")
+        sys.exit(0)
 
     work_args_list = [(i, args.min_re, args.db_dir,
-        os.path.basename(i)[:-4]) for i in vcfs]
+        os.path.basename(i)[:-4]) for i in vcf_tobe_add]
     with Pool(processes=args.threads) as pool:
         pool.map(vcf_to_db_bed, work_args_list)
 

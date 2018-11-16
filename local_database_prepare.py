@@ -17,7 +17,7 @@ def vcf_to_db_bed(_args):
         lines = io.readlines()
 
         # chromosomes to be kept
-        main_chr = (list(range(1, 23)) + ["X", "Y", "MT", "M", "chrX", "chrY",
+        main_chr = ([str(i) for i in range(1, 23)] + ["X", "Y", "MT", "M", "chrX", "chrY",
             "chrM", "chrMT"] + ["chr" + str(i) for i in range(1, 23)])
 
         # output bedlines
@@ -164,7 +164,7 @@ def main():
     #for i in vcf_tobe_add:
     #    print("add {} to local SV database".format(i))
     if len(vcf_tobe_add) == 0:
-        print("database is newest.")
+        print("database is the newest.")
         sys.exit(0)
 
     work_args_list = [(i, args.min_re, args.db_dir,

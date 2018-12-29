@@ -110,7 +110,8 @@ def format_local_result(result, local_db_size):
     for i in result:
         variations = []
         for j in result[i]:
-            variations.append("{}:{}-{},{}".format(j[0],j[1],j[2],j[3]))
+            # variations.append("{}:{}-{},{}".format(j[0],j[1],j[2],j[3]))
+            variations.append(j[4])
         variations_str = ";".join(variations)
         frequency = len(variations)/local_db_size
         if frequency > 1:
